@@ -69,8 +69,8 @@ npm run build
 
 ## 样例展示
 
-![卡片示例-秋季主题](./public/sample-autumn.png)
-![卡片示例-冬季主题](./public/sample-winter.png)
+![卡片示例](./public/阅读卡片1.png)
+![卡片示例-冬季主题](./public/阅读卡片2.png)
 
 ## 许可证
 
