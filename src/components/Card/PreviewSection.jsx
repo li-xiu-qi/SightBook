@@ -9,14 +9,15 @@ const PreviewSection = ({
   cardDimensions,
   zoomLevel,
   cardPreviewRef,
-  onGenerate,
   onExport,
   onCopy,
   onZoomIn,
   onZoomOut,
   onZoomReset,
   onFullscreen,
-  onThemeChange
+  onThemeChange,
+  clarity,
+  setClarity
 }) => {
   return (
     <div className="preview-section">
@@ -28,9 +29,10 @@ const PreviewSection = ({
       />
       
       <CardActions 
-        onGenerate={onGenerate}
         onExport={onExport}
         onCopy={onCopy}
+        clarity={clarity}
+        setClarity={setClarity}
       />
       
       <PreviewControls 

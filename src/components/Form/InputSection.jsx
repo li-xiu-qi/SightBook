@@ -23,7 +23,7 @@ const InputSection = ({ cardData, onInputChange }) => {
             type="text"
             value={cardData.author}
             onChange={onInputChange}
-            placeholder="例如: 达利欧："
+            placeholder="例如: 筱可："
           />
         </div>
 
@@ -56,19 +56,6 @@ const InputSection = ({ cardData, onInputChange }) => {
             value={cardData.footer}
             onChange={onInputChange}
             placeholder="例如: 秋日思绪，温暖心灵"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="date">右上角日期</label>
-          <input
-            id="date"
-            type="text"
-            value={cardData.date}
-            onChange={onInputChange}
-            placeholder="例如: 2023年·秋"
-            disabled
-            title="日期会在生成卡片时自动更新为当前日期"
           />
         </div>
       </form>

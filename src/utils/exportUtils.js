@@ -23,7 +23,7 @@ export const svgToBlob = (svgElement) => {
 };
 
 // SVG转为PNG/JPG
-export const svgToCanvas = async (svgElement, format = 'png', dimensions) => {
+export const svgToCanvas = async (svgElement, format = 'png', dimensions, scaleFactor = 1) => {
   return new Promise((resolve, reject) => {
     try {
       // 克隆SVG元素
@@ -38,10 +38,11 @@ export const svgToCanvas = async (svgElement, format = 'png', dimensions) => {
       const base64SVG = btoa(unescape(encodeURIComponent(svgString)));
       const imgSrc = `data:image/svg+xml;base64,${base64SVG}`;
 
-      // 创建Canvas
+      // 创建Canvas并应用清晰度倍数
       const canvas = document.createElement('canvas');
-      canvas.width = 800;
-      canvas.height = dimensions.height || 600;
+      // 根据清晰度倍数调整canvas尺寸
+      canvas.width = 800 * scaleFactor;
+      canvas.height = (dimensions.height || 600) * scaleFactor;
       const ctx = canvas.getContext('2d');
 
       // 创建图像元素
@@ -53,7 +54,7 @@ export const svgToCanvas = async (svgElement, format = 'png', dimensions) => {
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 绘制SVG图像
+        // 应用清晰度倍数进行缩放绘制
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
         // 根据格式导出
@@ -64,7 +65,12 @@ export const svgToCanvas = async (svgElement, format = 'png', dimensions) => {
           canvas.toBlob(
             (blob) => {
               if (blob) {
-                resolve({ blob, canvas, dataUrl: canvas.toDataURL(mimeType, quality) });
+                resolve({ 
+                  blob, 
+                  canvas, 
+                  dataUrl: canvas.toDataURL(mimeType, quality),
+                  scaleFactor 
+                });
               } else {
                 reject(new Error(`无法生成${format.toUpperCase()}文件`));
               }
@@ -76,7 +82,7 @@ export const svgToCanvas = async (svgElement, format = 'png', dimensions) => {
           // 回退方法
           try {
             const dataUrl = canvas.toDataURL(mimeType, quality);
-            resolve({ dataUrl, canvas });
+            resolve({ dataUrl, canvas, scaleFactor });
           } catch (backupErr) {
             reject(backupErr);
           }

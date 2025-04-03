@@ -103,9 +103,10 @@ main {
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* 卡片操作按钮 */
+/* 卡片操作按钮 - 修改样式以适应仅有导出功能 */
 .card-actions {
   display: flex;
+  justify-content: flex-end;
   gap: 10px;
   margin-bottom: 15px;
   flex-wrap: wrap;
@@ -257,7 +258,7 @@ input:focus, textarea:focus, select:focus {
   display: none;
   position: absolute;
   background-color: white;
-  min-width: 180px;
+  min-width: 220px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 10;
   border-radius: 4px;
@@ -268,6 +269,7 @@ input:focus, textarea:focus, select:focus {
   opacity: 0;
   transform: translateY(-10px);
   transition: opacity 0.3s, transform 0.3s;
+  padding: 10px;
 }
 
 .dropdown-content.show {
@@ -286,6 +288,49 @@ input:focus, textarea:focus, select:focus {
 
 .dropdown i.rotate {
   transform: rotate(180deg);
+}
+
+.dropdown-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dropdown-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* 清晰度选择器样式 */
+.clarity-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 5px 0;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 5px;
+}
+
+.clarity-selector label {
+  font-size: 12px;
+  color: #774936;
+  font-weight: bold;
+}
+
+.clarity-select {
+  padding: 5px;
+  border: 1px solid #ddbea9;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #6b705c;
+  background-color: white;
+}
+
+.clarity-select:focus {
+  outline: none;
+  border-color: #e07a5f;
+  box-shadow: 0 0 3px rgba(224, 122, 95, 0.3);
 }
 
 /* 全屏预览模式 - 修改样式解决顶部不可见问题 */

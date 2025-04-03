@@ -68,10 +68,21 @@ function App() {
   // 引用SVG内容
   const cardPreviewRef = useRef(null);
 
-  // 在内容变化时重新计算高度
+  // 添加清晰度倍数状态
+  const [clarity, setClarity] = useState(1);
+
+  // 在组件加载时和内容变化时实时更新高度
   useEffect(() => {
     updateCardHeight();
   }, [cardData.content, cardData.quote]);
+  
+  // 在组件首次加载和主题变化时更新日期
+  useEffect(() => {
+    setCardData(prev => ({
+      ...prev,
+      date: getCurrentFormattedDate()
+    }));
+  }, [cardData.theme]);
 
   // 计算卡片所需高度
   const updateCardHeight = () => {
@@ -141,7 +152,7 @@ function App() {
   };
 
   // 下载卡片函数
-  const downloadCard = async (format = 'svg') => {
+  const downloadCard = async (format = 'svg', scaleFactor = 1) => {
     const taskId = addExportTask(format, `正在导出${format.toUpperCase()}...`);
 
     try {
@@ -158,7 +169,7 @@ function App() {
       updateExportTask(taskId, { progress: 20, message: '处理SVG数据...' });
 
       if (format === 'svg') {
-        // 导出SVG
+        // 导出SVG (SVG格式不受清晰度影响)
         const svgBlob = svgToBlob(svgElement);
         const svgUrl = URL.createObjectURL(svgBlob);
 
@@ -167,20 +178,34 @@ function App() {
         downloadFile(svgUrl, '阅读卡片.svg');
         completeExportTask(taskId, true, 'SVG卡片已成功下载');
       } else if (format === 'png' || format === 'jpg') {
-        updateExportTask(taskId, { progress: 40, message: '转换为图像格式...' });
+        // 导出PNG/JPG，应用清晰度倍数
+        let clarityText = "";
+        if (scaleFactor > 1) {
+          clarityText = ` (${scaleFactor}x清晰度)`;
+        }
+        
+        updateExportTask(taskId, { 
+          progress: 40, 
+          message: `转换为${format.toUpperCase()}${clarityText}...` 
+        });
 
         try {
-          const { blob, dataUrl } = await svgToCanvas(svgElement, format, cardDimensions);
+          const { blob, dataUrl } = await svgToCanvas(svgElement, format, cardDimensions, scaleFactor);
           
           updateExportTask(taskId, { progress: 80, message: '准备下载...' });
           
+          // 在文件名中标注清晰度
+          const filename = scaleFactor > 1 
+            ? `阅读卡片_${scaleFactor}x.${format}`
+            : `阅读卡片.${format}`;
+            
           if (blob) {
             const url = URL.createObjectURL(blob);
-            downloadFile(url, `阅读卡片.${format}`);
-            completeExportTask(taskId, true, `${format.toUpperCase()}卡片已成功下载`);
+            downloadFile(url, filename);
+            completeExportTask(taskId, true, `${format.toUpperCase()}卡片已成功下载${clarityText}`);
           } else if (dataUrl) {
-            downloadFile(dataUrl, `阅读卡片.${format}`);
-            completeExportTask(taskId, true, `${format.toUpperCase()}卡片已下载（备用方法）`);
+            downloadFile(dataUrl, filename);
+            completeExportTask(taskId, true, `${format.toUpperCase()}卡片已下载${clarityText}`);
           } else {
             throw new Error(`无法生成${format.toUpperCase()}文件`);
           }
@@ -196,9 +221,14 @@ function App() {
   };
 
   // 复制到剪贴板
-  const copyToClipboard = async () => {
+  const copyToClipboard = async (scaleFactor = 1) => {
     const taskId = addExportTask('clipboard', '正在准备复制到剪贴板...');
-
+    
+    let clarityText = "";
+    if (scaleFactor > 1) {
+      clarityText = ` (${scaleFactor}x清晰度)`;
+    }
+    
     try {
       if (!cardPreviewRef.current) {
         throw new Error('未找到SVG元素');
@@ -218,8 +248,8 @@ function App() {
       try {
         // 使用canvas转换
         const canvas = document.createElement('canvas');
-        canvas.width = 800;
-        canvas.height = cardDimensions.height;
+        canvas.width = 800 * scaleFactor;
+        canvas.height = cardDimensions.height * scaleFactor;
         const ctx = canvas.getContext('2d');
         
         // 克隆SVG元素
@@ -260,7 +290,7 @@ function App() {
                 await navigator.clipboard.write([
                   new ClipboardItem({ 'image/png': blob })
                 ]);
-                completeExportTask(taskId, true, '卡片已复制到剪贴板');
+                completeExportTask(taskId, true, `卡片已复制到剪贴板${clarityText}`);
               } else {
                 throw new Error('无法创建PNG数据');
               }
@@ -283,7 +313,7 @@ function App() {
                 const data = [new ClipboardItem({ 'image/png': blob })];
                 const item = new ClipboardItem({ 'image/png': blob });
                 navigator.clipboard.write(data).then(() => {
-                  completeExportTask(taskId, true, '卡片已复制到剪贴板');
+                  completeExportTask(taskId, true, `卡片已复制到剪贴板${clarityText}`);
                 }).catch(err => {
                   // 如果还是失败，回退到文本提示
                   textFallback();
@@ -361,6 +391,8 @@ function App() {
           onZoomReset={handleZoomReset}
           onFullscreen={handleFullscreen}
           onThemeChange={handleThemeChange}
+          clarity={clarity}
+          setClarity={setClarity}
         />
       </main>
 
