@@ -13,6 +13,27 @@ import ExportTasksList from './components/Export/ExportTasksList';
 import { calculateCardHeight } from './utils/cardUtils';
 import { svgToBlob, svgToCanvas, downloadFile } from './utils/exportUtils';
 
+// 获取当前日期格式化函数
+const getCurrentFormattedDate = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  
+  // 根据月份判断季节
+  const month = now.getMonth() + 1; // 月份从0开始
+  let season;
+  if (month >= 3 && month <= 5) {
+    season = '春';
+  } else if (month >= 6 && month <= 8) {
+    season = '夏';
+  } else if (month >= 9 && month <= 11) {
+    season = '秋';
+  } else {
+    season = '冬';
+  }
+  
+  return `${year}年·${season}`;
+};
+
 function App() {
   // 卡片内容状态
   const [cardData, setCardData] = useState({
@@ -27,7 +48,7 @@ function App() {
 
 极度探寻真相、极度透明，如何大大改善了我的决策和人际关系。所以每当我面对抉择时，我的直觉都是保持透明。`,
     footer: '秋日思绪，温暖心灵',
-    date: '2023年·秋',
+    date: getCurrentFormattedDate(), // 使用当前日期
     theme: 'autumn'
   });
 
@@ -107,9 +128,16 @@ function App() {
     setCardData(prev => ({ ...prev, [id]: value }));
   };
 
+  // 处理主题变化
+  const handleThemeChange = (theme) => {
+    setCardData(prev => ({ ...prev, theme }));
+  };
+
   // 生成卡片
   const generateCard = () => {
+    // 更新高度并设置当前日期
     updateCardHeight();
+    setCardData(prev => ({ ...prev, date: getCurrentFormattedDate() }));
   };
 
   // 下载卡片函数
@@ -184,52 +212,117 @@ function App() {
         throw new Error('未找到SVG元素，请重新生成卡片');
       }
 
-      updateExportTask(taskId, { progress: 40, message: '处理SVG数据...' });
-
-      // 尝试方法1：直接复制SVG
-      if (navigator.clipboard && window.ClipboardItem) {
-        try {
-          const svgBlob = svgToBlob(svgElement);
-          await navigator.clipboard.write([
-            new ClipboardItem({ 'image/svg+xml': svgBlob })
-          ]);
-          completeExportTask(taskId, true, '卡片已复制到剪贴板');
-          return;
-        } catch (e) {
-          console.warn('SVG复制到剪贴板失败，尝试PNG方法', e);
-          updateExportTask(taskId, { progress: 60, message: '尝试PNG方法...' });
-        }
-      }
-
-      // 尝试方法2：转换为PNG再复制
-      try {
-        updateExportTask(taskId, { progress: 70, message: '转换为PNG...' });
+      // 直接转换为PNG复制 - 跳过尝试SVG复制的步骤
+      updateExportTask(taskId, { progress: 40, message: '转换为PNG...' });
         
-        const { blob, canvas } = await svgToCanvas(svgElement, 'png', cardDimensions);
-
-        updateExportTask(taskId, { progress: 90, message: '复制到剪贴板...' });
-
-        // 复制PNG到剪贴板
-        if (navigator.clipboard && navigator.clipboard.write && blob) {
-          await navigator.clipboard.write([
-            new ClipboardItem({ 'image/png': blob })
-          ]);
-          completeExportTask(taskId, true, '卡片已复制到剪贴板（PNG格式）');
+      try {
+        // 使用canvas转换
+        const canvas = document.createElement('canvas');
+        canvas.width = 800;
+        canvas.height = cardDimensions.height;
+        const ctx = canvas.getContext('2d');
+        
+        // 克隆SVG元素
+        const clonedSvg = svgElement.cloneNode(true);
+        clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        
+        // 获取SVG字符串并转换为数据URL
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(clonedSvg);
+        const svgURL = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+        
+        // 创建图像元素
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
+        updateExportTask(taskId, { progress: 60, message: '正在绘制图像...' });
+        
+        // 使用Promise等待图像加载完成
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error('图像加载失败'));
+          img.src = svgURL;
+        });
+        
+        // 绘制白色背景和SVG
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        updateExportTask(taskId, { progress: 80, message: '复制到剪贴板...' });
+        
+        // 尝试多种复制方法
+        if (navigator.clipboard && navigator.clipboard.write) {
+          // 方法1: 使用标准Clipboard API (现代浏览器)
+          canvas.toBlob(async (blob) => {
+            try {
+              if (blob) {
+                await navigator.clipboard.write([
+                  new ClipboardItem({ 'image/png': blob })
+                ]);
+                completeExportTask(taskId, true, '卡片已复制到剪贴板');
+              } else {
+                throw new Error('无法创建PNG数据');
+              }
+            } catch (clipErr) {
+              // 尝试备用复制方法
+              fallbackCopy();
+            }
+          }, 'image/png');
         } else {
-          throw new Error('浏览器不支持复制图像到剪贴板');
+          // 直接尝试备用方法
+          fallbackCopy();
         }
-      } catch (err) {
-        console.error('PNG复制失败:', err);
-        updateExportTask(taskId, { progress: 95, message: '尝试文本复制...' });
-
-        // 尝试方法3：文本回退方案
+        
+        // 备用复制方法
+        function fallbackCopy() {
+          try {
+            // 方法2: 尝试使用execCommand (旧版浏览器)
+            canvas.toBlob(blob => {
+              try {
+                const data = [new ClipboardItem({ 'image/png': blob })];
+                const item = new ClipboardItem({ 'image/png': blob });
+                navigator.clipboard.write(data).then(() => {
+                  completeExportTask(taskId, true, '卡片已复制到剪贴板');
+                }).catch(err => {
+                  // 如果还是失败，回退到文本提示
+                  textFallback();
+                });
+              } catch (err) {
+                textFallback();
+              }
+            }, 'image/png');
+          } catch (err) {
+            textFallback();
+          }
+        }
+        
+        // 文本回退方案
+        function textFallback() {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText('阅读卡片无法以图像形式复制，请使用下载功能保存卡片。')
+              .then(() => {
+                completeExportTask(taskId, true, '已复制提示文本（浏览器不支持图像复制）');
+              })
+              .catch(() => {
+                completeExportTask(taskId, false, '复制功能不可用，请使用下载功能');
+              });
+          } else {
+            completeExportTask(taskId, false, '复制功能不可用，请使用下载功能');
+          }
+        }
+      } catch (error) {
+        console.error('转换为PNG失败:', error);
+        // 尝试文本回退
         if (navigator.clipboard && navigator.clipboard.writeText) {
           try {
-            await navigator.clipboard.writeText('阅读卡片内容无法以图像形式复制，请使用下载功能保存卡片。');
-            completeExportTask(taskId, true, '已复制提示文本');
+            await navigator.clipboard.writeText('阅读卡片无法以图像形式复制，请使用下载功能保存卡片。');
+            completeExportTask(taskId, true, '已复制提示文本（图像转换失败）');
           } catch (textErr) {
             completeExportTask(taskId, false, '复制失败，请使用下载功能');
           }
+        } else {
+          completeExportTask(taskId, false, '复制失败，请使用下载功能');
         }
       }
     } catch (error) {
@@ -267,6 +360,7 @@ function App() {
           onZoomOut={handleZoomOut}
           onZoomReset={handleZoomReset}
           onFullscreen={handleFullscreen}
+          onThemeChange={handleThemeChange}
         />
       </main>
 

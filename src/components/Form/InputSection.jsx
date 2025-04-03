@@ -67,21 +67,9 @@ const InputSection = ({ cardData, onInputChange }) => {
             value={cardData.date}
             onChange={onInputChange}
             placeholder="例如: 2023年·秋"
+            disabled
+            title="日期会在生成卡片时自动更新为当前日期"
           />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="theme">卡片主题</label>
-          <select
-            id="theme"
-            value={cardData.theme}
-            onChange={onInputChange}
-          >
-            <option value="autumn">秋季主题</option>
-            <option value="winter">冬季主题</option>
-            <option value="spring">春季主题</option>
-            <option value="summer">夏季主题</option>
-          </select>
         </div>
       </form>
     </div>

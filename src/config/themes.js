@@ -1,25 +1,5 @@
-// 定义应用的主题配色方案
+// 定义应用的主题配色方案（按春夏秋冬顺序）
 const themes = {
-  autumn: {
-    primary: '#774936',
-    secondary: '#cb997e',
-    tertiary: '#ddbea9',
-    accent: '#e07a5f',
-    text: '#6b705c',
-    bgLight: '#fff8f0',
-    bgDark: '#fff1e6',
-    light: '#ffe8d6'
-  },
-  winter: {
-    primary: '#2c3e50',
-    secondary: '#7f8c8d',
-    tertiary: '#bdc3c7',
-    accent: '#3498db',
-    text: '#34495e',
-    bgLight: '#ecf0f1',
-    bgDark: '#e0e6e8',
-    light: '#f5f7fa'
-  },
   spring: {
     primary: '#2d6a4f',
     secondary: '#40916c',
@@ -39,6 +19,26 @@ const themes = {
     bgLight: '#fffdeb',
     bgDark: '#fef3de',
     light: '#fff8e8'
+  },
+  autumn: {
+    primary: '#774936',
+    secondary: '#cb997e',
+    tertiary: '#ddbea9',
+    accent: '#e07a5f',
+    text: '#6b705c',
+    bgLight: '#fff8f0',
+    bgDark: '#fff1e6',
+    light: '#ffe8d6'
+  },
+  winter: {
+    primary: '#2c3e50',
+    secondary: '#7f8c8d',
+    tertiary: '#bdc3c7',
+    accent: '#3498db',
+    text: '#34495e',
+    bgLight: '#ecf0f1',
+    bgDark: '#e0e6e8',
+    light: '#f5f7fa'
   }
 };
 
