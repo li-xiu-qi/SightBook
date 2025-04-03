@@ -1,0 +1,451 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Microsoft YaHei', sans-serif;
+  background-color: #f5f5f5;
+  color: #6b705c;
+  line-height: 1.6;
+}
+
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;  /* 水平居中 */
+  padding: 20px;
+  min-height: 100vh;  /* 至少占满整个视口高度 */
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #fff8f0;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(203, 153, 126, 0.2);
+}
+
+header h1 {
+  color: #774936;
+  margin-bottom: 10px;
+}
+
+/* 主内容区使用flex增长，确保footer在底部 */
+main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  flex: 1;  /* 让主内容区域占据剩余空间 */
+  margin-bottom: 20px;  /* 与底部保持间距 */
+}
+
+.input-section {
+  flex: 1;
+  min-width: 300px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.preview-section {
+  flex: 1;
+  min-width: 300px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 卡片操作按钮 */
+.card-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.card-actions button {
+  padding: 10px 20px;
+  min-height: 44px;
+  min-width: 120px;
+  font-weight: bold;
+  background-color: #cb997e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.card-actions button:hover {
+  background-color: #774936;
+}
+
+.card-actions .primary-btn {
+  background-color: #e07a5f;
+}
+
+.card-actions .primary-btn:hover {
+  background-color: #d06a4f;
+}
+
+/* 预览控制区 */
+.preview-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.preview-controls button {
+  padding: 5px 10px;
+  font-size: 12px;
+  background-color: #fff8f0;
+  color: #6b705c;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.preview-controls button:hover {
+  background-color: #ffe8d6;
+}
+
+/* 卡片预览区域 - 修改支持自适应高度 */
+.card-preview-container {
+  position: relative;
+  width: 100%;
+  min-height: 450px;
+  overflow: auto; /* 改为auto以支持滚动 */
+  border: 1px solid #ddbea9;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  background-color: #f8f8f8;
+  height: 100%;
+}
+
+.card-preview {
+  position: relative; /* 改为relative而不是absolute */
+  width: 100%;
+  min-height: 450px;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0; /* 添加上下内边距 */
+}
+
+.card-preview svg {
+  display: block;
+  width: 100%;
+  max-width: 800px; /* 限制最大宽度 */
+  height: auto;
+  margin: 0 auto; /* 居中显示 */
+}
+
+/* 确保SVG内部的foreignObject正确显示 */
+.card-preview foreignObject div {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* 缩放状态 */
+.zoom-in .card-preview svg {
+  max-width: 120%;
+}
+
+.zoom-out .card-preview svg {
+  max-width: 80%;
+}
+
+/* 表单元素样式 */
+.form-group {
+  margin-bottom: 20px;
+}
+
+h2 {
+  color: #774936;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ddbea9;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  color: #774936;
+  font-weight: bold;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddbea9;
+  border-radius: 4px;
+  font-family: inherit;
+  color: #6b705c;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #e07a5f;
+  box-shadow: 0 0 5px rgba(224, 122, 95, 0.5);
+}
+
+/* 导出下拉菜单 */
+.dropdown {
+  position: relative;
+  display: inline-block;
+  z-index: 10;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  min-width: 180px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 10;
+  border-radius: 4px;
+  overflow: hidden;
+  top: 100%;
+  left: 0;
+  margin-top: 5px;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.dropdown-content.show {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dropdown i {
+  display: inline-block;
+  transition: transform 0.3s;
+  margin-left: 5px;
+  font-style: normal;
+  font-size: 10px;
+}
+
+.dropdown i.rotate {
+  transform: rotate(180deg);
+}
+
+/* 全屏预览模式 - 修改样式解决顶部不可见问题 */
+.fullscreen-mode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.95);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* 改为顶部对齐而非居中 */
+  align-items: center;
+  padding: 60px 20px 20px; /* 增加顶部内边距给关闭按钮留出空间 */
+  overflow-y: auto; /* 添加垂直滚动条 */
+}
+
+/* 全屏模式下的样式调整 */
+.fullscreen-mode .card-preview {
+  width: 100%;
+  height: auto; /* 不固定高度，适应内容 */
+  min-height: auto; /* 移除最小高度限制 */
+  overflow: visible; /* 确保内容不被剪切 */
+  justify-content: center;
+  padding: 20px 0; /* 保留水平内边距 */
+}
+
+.fullscreen-mode .card-preview svg {
+  max-width: 90%; /* 确保全屏模式下SVG不会太大 */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.fullscreen-close {
+  position: fixed; /* 改为fixed确保按钮始终可见 */
+  top: 15px;
+  right: 15px;
+  background-color: #cb997e;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 1001; /* 确保按钮位于最上层 */
+}
+
+/* 导出进度指示器 */
+.export-progress {
+  display: none;
+}
+
+/* 右上角导出进度条容器 */
+.export-tasks-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 300px;
+  max-height: 150px; /* 限制高度，最多显示两个进度条 */
+  overflow-y: auto;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: opacity 0.3s;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 当有任务时显示容器 */
+.export-tasks-container:not(:empty) {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* 单个导出任务卡片 */
+.export-task {
+  background-color: white;
+  border-radius: 6px;
+  padding: 8px 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #ddbea9;
+  transition: all 0.3s ease;
+}
+
+.export-task.success {
+  border-left-color: #4caf50;
+}
+
+.export-task.error {
+  border-left-color: #f44336;
+}
+
+.export-task-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+
+.export-task-format {
+  font-weight: bold;
+  color: #774936;
+}
+
+.export-task-message {
+  color: #6b705c;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 进度条样式 */
+.export-progress-bar {
+  height: 6px;
+  background-color: #f0f0f0;
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.export-progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: #e07a5f;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.export-task.success .export-progress-fill {
+  background-color: #4caf50;
+}
+
+.export-task.error .export-progress-fill {
+  background-color: #f44336;
+}
+
+.export-progress-text {
+  position: absolute;
+  right: 5px;
+  top: -7px;
+  font-size: 10px;
+  color: #774936;
+}
+
+/* 滚动条样式美化 */
+.export-tasks-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.export-tasks-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 3px;
+}
+
+.export-tasks-container::-webkit-scrollbar-thumb {
+  background-color: rgba(203, 153, 126, 0.5);
+  border-radius: 3px;
+}
+
+.export-tasks-container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(203, 153, 126, 0.8);
+}
+
+footer {
+  margin-top: auto;  /* 将footer推到容器底部 */
+  text-align: center;
+  padding: 20px;
+  color: #cb997e;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  main {
+    flex-direction: column;
+  }
+  
+  .input-section, .preview-section {
+    flex: none;
+    width: 100%;
+  }
+
+  .card-actions, .preview-controls {
+    justify-content: center;
+  }
+}
+
+/* 确保宽度适应更小的屏幕 */
+@media (max-width: 1240px) {
+  .app-container {
+    max-width: 95%;
+  }
+}
