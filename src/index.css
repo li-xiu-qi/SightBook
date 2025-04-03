@@ -1,31 +1,53 @@
+/* 根元素样式变量定义，应用于整个文档 */
 :root {
+  /* 字体家族设置，优先使用微软雅黑，依次降级到系统默认字体和通用字体 */
   font-family: 'Microsoft YaHei', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  /* 行高设置为字体大小的1.5倍，提高可读性 */
   line-height: 1.5;
+  /* 字体粗细设置为400(普通) */
   font-weight: 400;
+  /* 文本颜色设置为暗灰绿色 */
   color: #6b705c;
+  /* 背景颜色设置为淡灰色 */
   background-color: #f5f5f5;
+  /* 禁用字体合成，防止浏览器自动生成粗体或斜体 */
   font-synthesis: none;
+  /* 优化文本渲染，提高清晰度 */
   text-rendering: optimizeLegibility;
+  /* 针对Webkit浏览器(如Chrome、Safari)的字体平滑处理 */
   -webkit-font-smoothing: antialiased;
+  /* 针对Firefox浏览器的字体平滑处理 */
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* body元素样式设置 */
 body {
+  /* 移除默认外边距 */
   margin: 0;
+  /* 移除默认内边距 */
   padding: 0;
+  /* 设置最小宽度，确保在小屏幕设备上有合适的显示 */
   min-width: 320px;
 }
 
+/* 链接元素样式设置 */
 a {
+  /* 链接文字稍微加粗 */
   font-weight: 500;
+  /* 设置链接颜色为橙红色 */
   color: #e07a5f;
+  /* 移除下划线 */
   text-decoration: inherit;
 }
 
+/* 鼠标悬停在链接上时的样式 */
 a:hover {
+  /* 悬停时链接颜色变深，提供视觉反馈 */
   color: #d06a4f;
 }
 
+/* 按钮元素样式设置 */
 button {
+  /* 使按钮继承页面的字体，保持一致性 */
   font-family: inherit;
 }

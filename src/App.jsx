@@ -113,7 +113,7 @@ function App() {
 
     // 确保最小高度为300px
     const contentHeight = Math.max(300, estimatedHeight);
-    
+
     // 减少固定的底部间距：从之前的290px减少到180px
     // 页眉页脚基础高度(约160px) + 较小的底部边距(20px)
     const totalHeight = contentHeight + 180;
@@ -139,9 +139,9 @@ function App() {
   // 添加新的导出任务
   const addExportTask = (format, message = '') => {
     const id = Date.now(); // 使用时间戳作为唯一ID
-    
+
     setExportTasks(prev => [
-      ...prev, 
+      ...prev,
       {
         id,
         format,
@@ -151,28 +151,28 @@ function App() {
         startTime: Date.now()
       }
     ]);
-    
+
     return id; // 返回任务ID以供后续更新
   };
-  
+
   // 更新导出任务进度
   const updateExportTask = (id, updates) => {
-    setExportTasks(prev => 
-      prev.map(task => 
+    setExportTasks(prev =>
+      prev.map(task =>
         task.id === id ? { ...task, ...updates } : task
       )
     );
   };
-  
+
   // 完成导出任务
   const completeExportTask = (id, success, message = '') => {
-    updateExportTask(id, { 
+    updateExportTask(id, {
       progress: 100,
       status: success ? 'success' : 'error',
       message,
       endTime: Date.now()
     });
-    
+
     // 3秒后移除已完成的任务
     setTimeout(() => {
       setExportTasks(prev => prev.filter(task => task.id !== id));
@@ -191,15 +191,11 @@ function App() {
   };
 
   // 显示导出操作的结果消息（保留向后兼容）
-  const showExportMessage = (message, isError = false) => {
-    const id = addExportTask('notification', message);
-    completeExportTask(id, !isError, message);
-  };
 
   // 下载卡片函数 - 使用任务进度系统
   const downloadCard = async (format = 'svg') => {
     const taskId = addExportTask(format, `正在导出${format.toUpperCase()}...`);
-    
+
     try {
       if (!cardPreviewRef.current) {
         throw new Error('未找到SVG元素，请先生成卡片');
@@ -215,18 +211,18 @@ function App() {
 
       // 克隆SVG元素以避免修改原始DOM
       const clonedSvg = svgElement.cloneNode(true);
-      
+
       // 为了确保正确渲染，设置一些必要的属性
       clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
       clonedSvg.setAttribute('width', '800px');
       clonedSvg.setAttribute('height', `${cardDimensions.height}px`);
-      
+
       updateExportTask(taskId, { progress: 20, message: '正在序列化SVG...' });
-      
+
       // 获取SVG的XML字符串
       const serializer = new XMLSerializer();
       const svgString = serializer.serializeToString(clonedSvg);
-      
+
       // 添加XML声明
       const svgData = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n' + svgString;
 
@@ -234,20 +230,20 @@ function App() {
 
       if (format === 'svg') {
         // 导出SVG
-        const svgBlob = new Blob([svgData], {type: 'image/svg+xml'});
+        const svgBlob = new Blob([svgData], { type: 'image/svg+xml' });
         const svgUrl = URL.createObjectURL(svgBlob);
-        
+
         updateExportTask(taskId, { progress: 60, message: '准备下载...' });
-        
+
         const downloadLink = document.createElement('a');
         downloadLink.href = svgUrl;
         downloadLink.download = '阅读卡片.svg';
         document.body.appendChild(downloadLink);
-        
+
         updateExportTask(taskId, { progress: 80, message: '开始下载...' });
         downloadLink.click();
         document.body.removeChild(downloadLink);
-        
+
         URL.revokeObjectURL(svgUrl);
         completeExportTask(taskId, true, 'SVG卡片已成功下载');
       } else if (format === 'png' || format === 'jpg') {
@@ -255,33 +251,33 @@ function App() {
         updateExportTask(taskId, { progress: 45, message: '正在编码SVG...' });
         const base64SVG = btoa(unescape(encodeURIComponent(svgData)));
         const imgSrc = `data:image/svg+xml;base64,${base64SVG}`;
-        
+
         updateExportTask(taskId, { progress: 50, message: '创建画布...' });
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        
+
         canvas.width = 800;
         canvas.height = cardDimensions.height;
-        
+
         const img = new Image();
         img.crossOrigin = 'anonymous';  // 避免跨域问题
-        
+
         // 监听图像加载
         img.onload = () => {
           updateExportTask(taskId, { progress: 60, message: '绘制图像...' });
           // 填充白色背景
           ctx.fillStyle = 'white';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
-          
+
           // 在画布上绘制SVG
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          
+
           try {
             updateExportTask(taskId, { progress: 70, message: '转换格式...' });
             // 选择适当的MIME类型和质量
             const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
             const quality = format === 'jpg' ? 0.9 : undefined;
-            
+
             // 使用canvas.toBlob转换为文件
             canvas.toBlob(
               (blob) => {
@@ -297,7 +293,7 @@ function App() {
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
-                  
+
                   completeExportTask(taskId, true, `${format.toUpperCase()}卡片已成功下载`);
                 } else {
                   throw new Error(`无法生成${format.toUpperCase()}文件`);
@@ -309,7 +305,7 @@ function App() {
           } catch (err) {
             console.error("Canvas转换出错:", err);
             updateExportTask(taskId, { progress: 70, message: '尝试备用方法...' });
-            
+
             // 回退方法：尝试使用canvas.toDataURL
             try {
               const dataUrl = canvas.toDataURL(format === 'png' ? 'image/png' : 'image/jpeg', format === 'jpg' ? 0.9 : undefined);
@@ -320,7 +316,7 @@ function App() {
               document.body.appendChild(a);
               a.click();
               document.body.removeChild(a);
-              
+
               completeExportTask(taskId, true, `${format.toUpperCase()}卡片已下载（备用方法）`);
             } catch (backupErr) {
               console.error("回退导出方法失败:", backupErr);
@@ -328,13 +324,13 @@ function App() {
             }
           }
         };
-        
+
         // 图像加载错误处理
         img.onerror = (err) => {
           console.error("图像加载失败:", err);
           completeExportTask(taskId, false, `无法加载图像，导出失败`);
         };
-        
+
         updateExportTask(taskId, { progress: 55, message: '加载图像...' });
         // 设置图像源
         img.src = imgSrc;
@@ -364,12 +360,12 @@ function App() {
 
       // 克隆SVG元素以避免修改原始DOM
       const clonedSvg = svgElement.cloneNode(true);
-      
+
       updateExportTask(taskId, { progress: 40, message: '处理SVG数据...' });
-      
+
       // 设置必要的属性
       clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-      
+
       // 获取SVG字符串
       const serializer = new XMLSerializer();
       const svgString = serializer.serializeToString(clonedSvg);
@@ -397,39 +393,39 @@ function App() {
         // 将SVG转换为Base64编码的数据URL
         const base64SVG = btoa(unescape(encodeURIComponent(svgString)));
         const imgSrc = `data:image/svg+xml;base64,${base64SVG}`;
-        
+
         // 创建Canvas
         const canvas = document.createElement('canvas');
         canvas.width = 800;
         canvas.height = cardDimensions.height;
         const ctx = canvas.getContext('2d');
-        
+
         // 创建图像元素
         const img = new Image();
         img.crossOrigin = 'anonymous';
-        
+
         // 定义图像加载后的操作
         img.onload = async () => {
           updateExportTask(taskId, { progress: 80, message: '准备图像数据...' });
           // 绘制白色背景
           ctx.fillStyle = 'white';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
-          
+
           // 绘制SVG图像
           ctx.drawImage(img, 0, 0);
-          
+
           updateExportTask(taskId, { progress: 90, message: '复制到剪贴板...' });
-          
+
           try {
             // 将Canvas转换为Blob
             const blob = await new Promise((resolve, reject) => {
               canvas.toBlob(resolve, 'image/png');
             });
-            
+
             if (!blob) {
               throw new Error('无法创建PNG图像');
             }
-            
+
             // 复制PNG到剪贴板
             if (navigator.clipboard && navigator.clipboard.write) {
               await navigator.clipboard.write([
@@ -442,7 +438,7 @@ function App() {
           } catch (err) {
             console.error('PNG复制失败:', err);
             updateExportTask(taskId, { progress: 95, message: '尝试文本复制...' });
-            
+
             // 尝试方法3：文本回退方案
             if (navigator.clipboard && navigator.clipboard.writeText) {
               try {
@@ -454,13 +450,13 @@ function App() {
             }
           }
         };
-        
+
         // 图像加载失败的处理
         img.onerror = () => {
           console.error('SVG图像加载失败');
           completeExportTask(taskId, false, '复制失败，请使用下载功能');
         };
-        
+
         // 开始加载图像
         img.src = imgSrc;
       } catch (error) {
@@ -493,8 +489,8 @@ function App() {
         <foreignObject x="100" y="190" width="600" height="${cardDimensions.contentHeight}">
           <div xmlns="http://www.w3.org/1999/xhtml" style="font-family: 'Microsoft YaHei', sans-serif; font-size: 14px; color: ${colors.text};">
             ${paragraphs.map((paragraph, index) =>
-              `<p style="margin-bottom: 20px; text-indent: ${index === 0 ? '0' : '2em'};"><span style="font-weight: bold;">${index + 1}.</span> ${paragraph.trim()}</p>`
-            ).join('')}
+        `<p style="margin-bottom: 20px; text-indent: ${index === 0 ? '0' : '2em'};"><span style="font-weight: bold;">${index + 1}.</span> ${paragraph.trim()}</p>`
+      ).join('')}
           </div>
         </foreignObject>
       `;
@@ -502,7 +498,7 @@ function App() {
 
     // 计算底部装饰和文本的位置 - 现在使用固定间距而不是固定位置
     const footerY = 190 + cardDimensions.contentHeight + 30; // 内容起始Y(190) + 内容高度 + 底部间距(30px)
-    
+
     // 装饰元素位置
     const decorY = footerY - 50;
 
@@ -564,25 +560,25 @@ function App() {
   // 导出任务显示组件
   const ExportTasksList = () => {
     if (exportTasks.length === 0) return null;
-    
+
     return (
       <div className="export-tasks-container" ref={exportContainerRef}>
         {exportTasks.map(task => (
-          <div 
-            key={task.id} 
+          <div
+            key={task.id}
             className={`export-task ${task.status !== 'pending' ? task.status : ''}`}
           >
             <div className="export-task-info">
               <span className="export-task-format">
-                {task.format === 'clipboard' ? '剪贴板' : 
-                 task.format === 'notification' ? '通知' :
-                 task.format.toUpperCase()}
+                {task.format === 'clipboard' ? '剪贴板' :
+                  task.format === 'notification' ? '通知' :
+                    task.format.toUpperCase()}
               </span>
               <span className="export-task-message">{task.message}</span>
             </div>
             <div className="export-progress-bar">
-              <div 
-                className="export-progress-fill" 
+              <div
+                className="export-progress-fill"
                 style={{ width: `${task.progress}%` }}
               ></div>
               <span className="export-progress-text">{`${task.progress}%`}</span>
@@ -599,7 +595,7 @@ function App() {
         <h1>阅读卡片生成器</h1>
         <p>输入您的文字，生成精美的阅读卡片</p>
       </header>
-      
+
       <main>
         <div className="input-section">
           <h2>输入内容</h2>
@@ -614,7 +610,7 @@ function App() {
                 placeholder="例如: #今日份阅读"
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="author">作者名称</label>
               <input
@@ -625,7 +621,7 @@ function App() {
                 placeholder="例如: 达利欧："
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="quote">引言/摘要</label>
               <textarea
@@ -635,7 +631,7 @@ function App() {
                 placeholder="作者的主要观点或引言"
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="content">正文内容</label>
               <textarea
@@ -646,7 +642,7 @@ function App() {
                 placeholder="输入主要内容，每段将自动生成序号"
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="footer">底部署名</label>
               <input
@@ -657,7 +653,7 @@ function App() {
                 placeholder="例如: 秋日思绪，温暖心灵"
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="date">右上角日期</label>
               <input
@@ -668,7 +664,7 @@ function App() {
                 placeholder="例如: 2023年·秋"
               />
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="theme">卡片主题</label>
               <select
@@ -684,13 +680,13 @@ function App() {
             </div>
           </form>
         </div>
-        
+
         <div className="preview-section">
           <h2>卡片预览</h2>
           <div className="card-actions">
             <button className="primary-btn" onClick={generateCard}>生成卡片</button>
             <div className="dropdown" ref={exportDropdownRef}>
-              <button 
+              <button
                 className="export-btn"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
@@ -704,45 +700,45 @@ function App() {
               </div>
             </div>
           </div>
-          
+
           <div className="preview-controls">
-            <button 
-              title="放大预览" 
+            <button
+              title="放大预览"
               onClick={() => setZoomLevel('zoom-in')}
             >
               放大
             </button>
-            <button 
-              title="缩小预览" 
+            <button
+              title="缩小预览"
               onClick={() => setZoomLevel('zoom-out')}
             >
               缩小
             </button>
-            <button 
-              title="适应屏幕" 
+            <button
+              title="适应屏幕"
               onClick={() => setZoomLevel('normal')}
             >
               适应屏幕
             </button>
-            <button 
-              title="全屏预览" 
+            <button
+              title="全屏预览"
               onClick={() => setIsFullscreen(true)}
             >
               全屏预览
             </button>
           </div>
-          
+
           <div className={`card-preview-container ${zoomLevel}`}>
-            <div 
-              id="cardPreview" 
-              className="card-preview" 
+            <div
+              id="cardPreview"
+              className="card-preview"
               ref={cardPreviewRef}
-              dangerouslySetInnerHTML={{ __html: renderCard() }} 
+              dangerouslySetInnerHTML={{ __html: renderCard() }}
             />
           </div>
         </div>
       </main>
-      
+
       {isFullscreen && (
         <div className="fullscreen-mode">
           <button className="fullscreen-close" onClick={() => setIsFullscreen(false)}>&times;</button>
@@ -751,16 +747,16 @@ function App() {
             <button onClick={() => setZoomLevel('zoom-out')}>缩小</button>
             <button onClick={() => setZoomLevel('normal')}>适应屏幕</button>
           </div>
-          <div 
-            className={`card-preview ${zoomLevel}`} 
+          <div
+            className={`card-preview ${zoomLevel}`}
             dangerouslySetInnerHTML={{ __html: renderCard() }}
           />
         </div>
       )}
-      
+
       {/* 导出任务列表显示 */}
       <ExportTasksList />
-      
+
       <footer>
         <p>SightBook 阅读卡片生成器 &copy; 2023</p>
       </footer>
