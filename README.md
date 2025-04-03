@@ -80,8 +80,7 @@ npm run build
 
 有任何问题或建议，欢迎通过以下方式联系:
 
-- 项目 Issues: [GitHub Issues](https://github.com/yourusername/SightBook/issues)
-- 电子邮件: your.email@example.com
+- 项目 Issues: [GitHub Issues](https://github.com/li-xiu-qi/SightBook/issues)
 
 ---
 
