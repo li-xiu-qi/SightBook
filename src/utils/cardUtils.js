@@ -40,7 +40,7 @@ export const calculateCardHeight = (content, quote) => {
 /**
  * 渲染SVG卡片
  */
-export const renderCard = (cardData, cardDimensions) => {
+export const renderCard = (cardData, cardDimensions, listStyle = 'ordered') => {
   const paragraphs = cardData.content.split('\n').filter(p => p.trim() !== '');
   const colors = themes[cardData.theme];
   
@@ -54,19 +54,37 @@ export const renderCard = (cardData, cardDimensions) => {
   const contentStartY = 190;
   const contentHeight = cardDimensions.contentHeight;
   
-  // 渲染内容段落
+  // 渲染内容段落，根据列表样式选择不同的渲染方式
   const renderParagraphs = () => {
     let y = contentStartY;
     const lines = [];
     
     paragraphs.forEach((paragraph, index) => {
-      // 每段的第一行带序号
+      // 根据列表样式选择前缀
+      let prefix = '';
+      let textIndent = '0';
+      
+      if (listStyle === 'ordered') {
+        // 有序列表使用数字
+        prefix = `<tspan font-weight="bold">${index + 1}.</tspan> `;
+        textIndent = index === 0 ? '0' : '2em';
+      } else if (listStyle === 'unordered') {
+        // 无序列表使用圆点
+        prefix = `<tspan font-weight="bold">• </tspan>`;
+        textIndent = index === 0 ? '0' : '2em';
+      } else {
+        // 不使用列表，只有首段不缩进，其他段落缩进
+        prefix = '';
+        textIndent = index === 0 ? '0' : '2em';
+      }
+      
+      // 每段的第一行
       lines.push(`<text x="100" y="${y}" font-family="'Microsoft YaHei', sans-serif" font-size="14" fill="${colors.text}">
-        <tspan font-weight="bold">${index + 1}.</tspan> ${paragraph.slice(0, 42)}
+        ${prefix}${paragraph.slice(0, prefix ? 40 : 42)}
       </text>`);
       
       // 剩余的文本按每行约42个字符换行
-      let remainingText = paragraph.slice(42);
+      let remainingText = paragraph.slice(prefix ? 40 : 42);
       while (remainingText.length > 0) {
         y += 25; // 行高
         const lineText = remainingText.slice(0, 42);

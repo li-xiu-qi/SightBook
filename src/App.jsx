@@ -71,6 +71,9 @@ function App() {
   // 添加清晰度倍数状态
   const [clarity, setClarity] = useState(1);
 
+  // 添加列表样式状态
+  const [listStyle, setListStyle] = useState('ordered');
+
   // 在组件加载时和内容变化时实时更新高度
   useEffect(() => {
     updateCardHeight();
@@ -375,7 +378,9 @@ function App() {
       <main>
         <InputSection 
           cardData={cardData} 
-          onInputChange={handleInputChange} 
+          onInputChange={handleInputChange}
+          listStyle={listStyle}
+          setListStyle={setListStyle}
         />
 
         <PreviewSection
@@ -393,6 +398,7 @@ function App() {
           onThemeChange={handleThemeChange}
           clarity={clarity}
           setClarity={setClarity}
+          listStyle={listStyle}
         />
       </main>
 
@@ -405,6 +411,7 @@ function App() {
           onZoomIn={handleZoomIn}
           onZoomOut={handleZoomOut}
           onZoomReset={handleZoomReset}
+          listStyle={listStyle}
         />
       )}
 

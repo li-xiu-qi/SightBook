@@ -1,6 +1,7 @@
 import React from 'react';
+import ListStyleSelector from './ListStyleSelector';
 
-const InputSection = ({ cardData, onInputChange }) => {
+const InputSection = ({ cardData, onInputChange, listStyle, setListStyle }) => {
   return (
     <div className="input-section">
       <h2>输入内容</h2>
@@ -39,6 +40,7 @@ const InputSection = ({ cardData, onInputChange }) => {
 
         <div className="form-group">
           <label htmlFor="content">正文内容</label>
+          <ListStyleSelector listStyle={listStyle} setListStyle={setListStyle} />
           <textarea
             id="content"
             rows={10}

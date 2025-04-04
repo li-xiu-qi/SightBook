@@ -9,7 +9,8 @@ const FullscreenPreview = ({
   onClose, 
   onZoomIn, 
   onZoomOut, 
-  onZoomReset 
+  onZoomReset,
+  listStyle
 }) => {
   return (
     <div className="fullscreen-mode">
@@ -21,7 +22,7 @@ const FullscreenPreview = ({
       />
       <div
         className={`card-preview ${zoomLevel}`}
-        dangerouslySetInnerHTML={{ __html: renderCard(cardData, cardDimensions) }}
+        dangerouslySetInnerHTML={{ __html: renderCard(cardData, cardDimensions, listStyle) }}
       />
     </div>
   );

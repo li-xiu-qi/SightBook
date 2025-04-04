@@ -17,7 +17,8 @@ const PreviewSection = ({
   onFullscreen,
   onThemeChange,
   clarity,
-  setClarity
+  setClarity,
+  listStyle
 }) => {
   return (
     <div className="preview-section">
@@ -47,6 +48,7 @@ const PreviewSection = ({
         cardDimensions={cardDimensions}
         zoomLevel={zoomLevel}
         ref={cardPreviewRef}
+        listStyle={listStyle}
       />
     </div>
   );
